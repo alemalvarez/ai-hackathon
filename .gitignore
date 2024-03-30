@@ -1,1 +1,28 @@
-env/
+# Python-related files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.log
+
+# Flask specific
+instance/
+*.pyc
+.env
+
+# Node.js and NPM
+node_modules/
+npm-debug.log
+
+# React build files
+/build
+
+# IDE files
+.idea/
+.vscode/
+
+# Miscellaneous
+*.DS_Store
+*.bak
+*.swp
