@@ -10,7 +10,9 @@ const App = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/response/', {
+      console.log('Submitting form...');
+      
+      const response = await fetch('http://localhost:5001/response/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -18,11 +20,14 @@ const App = () => {
         body: JSON.stringify({ project, details }),
       });
 
+      console.log('Response received:', response);
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
 
       const data = await response.json();
+      console.log('Data received:', data);
       setSubtasks(data.subtasks);
     } catch (error) {
       console.error('Error:', error);
@@ -32,9 +37,13 @@ const App = () => {
 
   const handleGetRequest = async () => {
     try {
-      const response = await fetch('http://localhost:5000/response/');
+      console.log('Sending GET request...');
+      
+      const response = await fetch('http://localhost:5001/response/');
+      console.log('Response received:', response);
+
       const data = await response.json();
-      console.log(data); // Handle the data as needed
+      console.log('Data received:', data); // Handle the data as needed
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred while fetching data.');
