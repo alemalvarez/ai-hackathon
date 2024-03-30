@@ -5,21 +5,26 @@ from openai import OpenAI
 import os
 
 app = Flask(__name__)
-api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-    raise ValueError('Your API is not detected in your environment vars. Double check.')
+
+@app.route('/')
+def home():
+    return jsonify({'message': 'Hello, World!'})
 
 CORS(app)
 @app.route('/response/', methods=['GET', 'POST'])
 def index():
     data = request.get_json()
-    
-    context = {
-        'project': "project",
-        'details': "details",
-        'subtasks': "subtasks"
-    }
-    return jsonify(**context)
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError('Your API is not detected in your environment vars. Double check.')
+
+    # print(data)
+    # context = {
+    #     'project': data.get('project'),
+    #     'details': data.get('details'),
+    #     'subtasks': "subtasks"
+    # }
+    # return jsonify(**context)
 
     if not data or 'project' not in data or 'details' not in data:
         return jsonify(error='Invalid JSON data. Project and details are required.'), 400
@@ -41,6 +46,7 @@ def index():
         ]
     )
     response = completion.choices[0].message.content
+    print(response + "hello")
 
     # Parse the response into a list of subtasks
     lines = response.strip().split('\n')
