@@ -1,0 +1,128 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Changed to white */
+    color: #333; /* Adjusted text color */
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto; /* Adjusted margin */
+    padding: 20px;
+    background-color: #f5f5f5; /* Changed to light gray */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adjusted box shadow */
+}
+
+h1, h2 {
+    text-align: center;
+    color: #673AB7; /* Purple color for headings */
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #673AB7; /* Purple color for labels */
+}
+
+input[type="text"],
+textarea {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none; /* Removed outline */
+}
+
+button[type="submit"] {
+    padding: 10px;
+    background-color: #673AB7; /* Purple color for button */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Added transition */
+}
+
+button[type="submit"]:hover {
+    background-color: #512DA8; /* Darker purple on hover */
+}
+
+.subtask-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.subtask-item {
+    margin-bottom: 10px;
+}
+
+.subtask-bubble {
+    display: flex;
+    align-items: center;
+    background-color: #E1BEE7; /* Light purple for bubble */
+    border-radius: 20px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adjusted box shadow */
+}
+
+.subtask-checkbox {
+    margin-right: 10px;
+}
+
+.subtask-text {
+    flex-grow: 1;
+    margin-right: 10px;
+    color: #333; /* Adjusted text color */
+}
+
+.delete-btn {
+    background-color: #F44336; /* Red color for delete button */
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Added transition */
+    margin-right: 5px;
+}
+
+.delete-btn:hover {
+    background-color: #D32F2F; /* Darker red on hover */
+}
+
+.action-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #673AB7; /* Purple color for action button */
+    transition: color 0.3s ease; /* Added transition */
+}
+
+.action-btn:hover {
+    color: #512DA8; /* Darker purple on hover */
+}
+
+.subtask-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+#delete-selected {
+    background-color: #F44336; /* Red color for delete selected button */
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Added transition */
+}
+
+#delete-selected:hover {
+    background-color: #D32F2F; /* Darker red on hover */
+}
