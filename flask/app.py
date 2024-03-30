@@ -1,5 +1,9 @@
-from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS, cross_origin
+
+from flask import Flask, render_template, request, jsonify
+
+from flask_cors import CORS
+from openai import OpenAI
+import os
 
 app = Flask(__name__)
 
@@ -28,11 +32,10 @@ def index():
 
     project = data['project']
     details = data['details']
-
     instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user."""
 
     prompt = f"""You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"""
-
+    print(data)
    
     client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
     completion = client.chat.completions.create(
@@ -52,7 +55,7 @@ def index():
     # Add CORS headers
     response_headers = {
         'Access-Control-Allow-Origin': 'http://localhost:3000',  # Update with your React frontend URL
-        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '3600'
     }
