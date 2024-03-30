@@ -13,6 +13,7 @@ CORS(app)
 @app.route('/response/', methods=['GET', 'POST'])
 def index():
     data = request.get_json()
+    
     context = {
         'project': "project",
         'details': "details",
@@ -61,4 +62,4 @@ def index():
     return jsonify(**context), 200, response_headers
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3001)
+    app.run(debug=True, port=5000)
