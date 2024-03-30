@@ -1,38 +1,145 @@
-.App {
-  text-align: center;
+
+/* Fonts */
+@font-face { 
+  font-family: "SF Pro";
+  src: url('fonts/SF-Pro-Text-Thin.otf') format('opentype');
+  font-weight: 300;
+}
+@font-face { 
+  font-family: "SF Pro Display - Ultralight";
+  src: url('fonts/SF-Pro-Display-Ultralight.woff2') format('opentype');
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  font-family: "SF Pro";
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* App Background */
+.app-background {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  min-height: 100vh;
+  background-color: white;
+  color: black;
+}
+
+/* App */
+.app {
+  height: 100%;
+  margin-top: 10%;
+}
+
+/* App Title */
+.app-title {
+  height: auto;
+  margin: 0 0 14px 0;
+  padding: 0;
+
+  font-family: 'SF Pro', sans-serif;
+  font-weight: 300;
+  font-size: 70px;
+}
+
+/* App Header - Title & Logo */
+.app-header {
+  display: flex;
+  flex-direction: row;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* App Logo */
+.app-logo {
+  aspect-ratio: 1/1;
+  width: 110px;
+  margin: 0 0 0 0;
+  padding: 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* App Slogan */
+.app-slogan {
+  margin: 0 0 38px 0;
+  padding: 0px;
+  font-family: 'SF Pro Display - Ultralight', sans-serif;
+  font-size: 34px;
+  font-weight: 500;
+  color: black;
 }
+
+/* Get Started Button */
+.get-started-button {
+  padding: 16px 18px;
+  font-family: "SF Pro";
+  font-size: 24px;
+  font-weight: 700;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 6px 3px 4.5px gray;
+  background-color: rgb(120, 166, 251);
+  transition: background-color 0.2s ease;
+  color:rgb(255, 255, 255);
+}
+  /* Get Started Button - On Click */
+  .get-started-button:active {
+    background-color: rgba(46, 118, 253, 0.8)
+  }
+
+
+/* Input Text Field: 'Enter Task Here' */
+input {
+  font-family: "SF Pro Display - Ultralight";
+  font-weight: 500;
+  width: 450px;
+  margin-top: 12px;
+  font-size: 20px;
+}
+
+/* AI Pop-Up Container, appears after user inputs task */ 
+.ai-popup-container {
+  z-index: 1;
+  width: auto;
+  height: auto;
+  margin: 20px 0 0 0;
+  padding: 15px 20px;
+  border-radius: 10px;
+  background-color: rgba(203, 203, 203, 0.4);
+}
+
+/* AI Pop-Up Title */
+.ai-popup-container h2 {
+  font-weight: normal;
+  margin: 0 0 5px 0;
+}
+
+/* List of Tasks */
+ol {
+  counter-reset: my-counter; /* Reset the counter for the numbering */
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+/* Individual Task */
+li {
+  margin: 5px;
+} 
+
+/* Numbered Circle */
+li:before {
+  content: counter(my-counter); /* Increment the counter */
+  counter-increment: my-counter; 
+  display: inline-block;
+  aspect-ratio: 1/1;
+  height: 25px; 
+  line-height: 25px; 
+  text-align: center; 
+  border-radius: 50%; 
+  background-color: rgb(208, 208, 208); 
+  color: #fff; 
+  font-weight: bold; 
+  margin-right: 10px; 
+}
+
