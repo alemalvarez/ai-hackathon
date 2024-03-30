@@ -1,0 +1,36 @@
+/* Slide out to the right and fade out for the landing page */
+@keyframes slideOutRightFadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(4%);
+    }
+}
+
+/* Slide in from the right and fade in for the main page */
+@keyframes slideInRightFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-4%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Animation classes */
+.slide-out-right-fade-out {
+    animation: slideOutRightFadeOut 0.4s forwards;
+    /* Change duration as needed */
+}
+
+.slide-in-right-fade-in {
+    animation: slideInRightFadeIn 0.4s forwards;
+    /* Change duration as needed */
+}
