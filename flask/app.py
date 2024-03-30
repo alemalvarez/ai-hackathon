@@ -35,7 +35,7 @@ def index():
     instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user."""
 
     prompt = f"""You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"""
-    print(data)
+    
    
     client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
     completion = client.chat.completions.create(
