@@ -13,6 +13,12 @@ CORS(app)
 @app.route('/response/', methods=['GET', 'POST'])
 def index():
     data = request.get_json()
+    context = {
+        'project': "project",
+        'details': "details",
+        'subtasks': "subtasks"
+    }
+    return jsonify(**context)
 
     if not data or 'project' not in data or 'details' not in data:
         return jsonify(error='Invalid JSON data. Project and details are required.'), 400
@@ -25,7 +31,7 @@ def index():
     prompt = f"""You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"""
 
    
-    client = OpenAI(organization="org-ocdPJoYXMFQNeH7dv0pV8g0p")
+    client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -41,12 +47,18 @@ def index():
 
     # Add CORS headers
     response_headers = {
-        'Access-Control-Allow-Origin': 'http://localhost:3000/',  # Update with your React frontend URL
+        'Access-Control-Allow-Origin': 'http://localhost:3000',  # Update with your React frontend URL
         'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '3600'
+    }
+    context = {
+        'project': project,
+        'details': details,
+        'subtasks': subtasks
     }
 
-    return jsonify(subtasks=subtasks), 200, response_headers
+    return jsonify(**context), 200, response_headers
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    app.run(debug=True, port=3001)
