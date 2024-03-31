@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Response, send_from_directory
 from openai import OpenAI
 import datetime
 import os
-app= Flask(__name__, static_folder='frontend/build', static_url_path='/')
+app= Flask(__name__, static_folder='build', static_url_path='/')
 
 # Load OpenAI API key from environment variable
 # openai_api_key = os.getenv('OPENAI_API_KEY')
