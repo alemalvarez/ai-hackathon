@@ -1,11 +1,8 @@
 from flask import Flask, request, jsonify, Response, send_from_directory
-from flask_cors import CORS
 from openai import OpenAI
 import datetime
 import os
 app= Flask(__name__, static_folder='../frontend/build', static_url_path='/')
-
-CORS(app)
 
 # Load OpenAI API key from environment variable
 # openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -56,14 +53,7 @@ def refine():
         'subtasks': refined_subtasks
     }
 
-    response_headers = {
-        'Access-Control-Allow-Origin': 'http://127.0.0.1:5001',  # Update with your React frontend URL
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Max-Age': '3600'
-    }
-
-    return jsonify(response_data), 200, response_headers
+    return jsonify(response_data), 200
 
 @app.route('/response/', methods=['POST'])
 def action():
@@ -90,21 +80,13 @@ def action():
     lines = response.strip().split('\n')
     subtasks = [line.split('. ', 1)[1] for line in lines if line.startswith(tuple(f"{i}. " for i in range(1, 11)))]
 
-    # Set CORS headers
-    response_headers = {
-        'Access-Control-Allow-Origin': 'http://127.0.0.1:5001',  # Update with your React frontend URL
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Max-Age': '3600'
-    }
-
     context = {
         'project': project,
         'details': details,
         'subtasks': subtasks
     }
 
-    return jsonify(context), 200, response_headers
+    return jsonify(context), 200
 
 @app.route('/save_to_ical/', methods=['POST'])
 def save_to_ical():
@@ -143,4 +125,4 @@ def save_to_ical():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run()
