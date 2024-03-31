@@ -3,7 +3,7 @@ name: Build and deploy Flask+React app to Azure Web App
 on:
   push:
     branches:
-      - main  # Assuming your main branch is where you merge your changes
+      - deployment  # Assuming your main branch is where you merge your changes
   workflow_dispatch:
 
 jobs:
