@@ -26,16 +26,67 @@ function LoginPage() {
 }
 
 function App() {
-  // States
+  // Frontend States
   const [showMainPage, setShowMainPage] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [outputData, setOutputData] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Backend States
+  const [project, setProject] = useState('');
+  const [details, setDetails] = useState('');
+  const [subtasks, setSubtasks] = useState([]);
+  const [error, setError] = useState('');
+
   //todo Keys (Place in .env files later for security)
   const domain = "dev-igx0eff32n6l7436.us.auth0.com"; 
   const clientId = "l9uS8Pp86tE0Oy3G75wNgvfIOUXxhCyh";
 
+  // Backend Function: Handle what happens when a user submits their input.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      console.log('Submitting form...');
+      
+      const response = await fetch('http://localhost:5001/response/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ project, details }),
+      });
+
+      console.log('Response received:', response);
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log('Data received:', data);
+      setSubtasks(data.subtasks);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('An error occurred while fetching data.');
+    }
+  };
+
+  // Backend Function: Handle what happens when a user clicks the Get Started button.
+  const handleGetRequest = async () => {
+    try {
+      console.log('Sending GET request...');
+      
+      const response = await fetch('http://localhost:5001/response/');
+      console.log('Response received:', response);
+
+      const data = await response.json();
+      console.log('Data received:', data); // Handle the data as needed
+    } catch (error) {
+      console.error('Error:', error);
+      setError('An error occurred while fetching data.');
+    }
+  };
 
   // Function: Handle what happens when a user submits their input.
   const handleInputSubmit = () => {
@@ -64,14 +115,16 @@ function App() {
         <header className="app-header">
           <h1 className="app-title">Chunkify.ai</h1>
         </header>
+        {/* Landing Page */}
         {!showMainPage ? (
           <div className={`landing-page-wrapper ${isAnimating ? 'slide-out-right-fade-out' : ''}`}>
             <h2 className="app-slogan">Where tasks meet their match. One chunk at a time.</h2>
             <button className="get-started-button" onClick={handleGetStartedClick}>Get Started</button>
           </div>
         ) : (
+          // Main page content
           <div className={`main-page-wrapper animated ${showMainPage && !isAnimating ? 'slide-in-right-fade-in' : ''}`}>
-            <input 
+            {/* <input 
               type="text" 
               value={inputValue} 
               onChange={(e) => setInputValue(e.target.value)} 
@@ -85,7 +138,41 @@ function App() {
                   {outputData.map((item, index) => <li key={index}>{item}</li>)}
                 </ol>
               </div>
-            )}
+            )} */}
+      <form onSubmit={handleSubmit}>
+        {/*<!-- Project --> */} 
+        <label htmlFor="project">Project:</label>
+        <input
+          type="text"
+          id="project"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+          placeholder="What you want to do" 
+          onKeyPress={handleKeyPress}
+        />
+        {/*<!-- Details --> */} 
+        <label htmlFor="details">Details:</label>
+        <input
+          type="text"
+          id="details"
+          value={details}
+          placeholder="Additional details"
+          onChange={(e) => setDetails(e.target.value)}
+        />
+        <button type="submit">Submit</button>
+      </form>
+      <button onClick={handleGetRequest}>Fetch Data</button>
+      {subtasks.length > 0 && (
+        <div>
+          <h2>Subtasks:</h2>
+          <ul>
+            {subtasks.map((subtask, index) => (
+              <li key={index}>{subtask}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {error && <p>{error}</p>}
           </div>
         )}
       </div>
