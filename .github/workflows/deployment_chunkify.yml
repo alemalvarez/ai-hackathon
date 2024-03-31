@@ -3,7 +3,7 @@ name: Build and deploy Flask+React app to Azure Web App
 on:
   push:
     branches:
-      - deployment  # Assuming your main branch is where you merge your changes
+      - main  # Assuming your main branch is where you merge your changes
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,11 @@ jobs:
         run: npm run build
 
       - name: Move built files back to the root directory
-        run: mv build/* ../
+        run: mv build ../
+
+      # Go back to the root directory for backend build
+      - name: Go back to root directory
+        run: cd ..
 
       # Build the Python Flask backend
       - name: Set up Python version
