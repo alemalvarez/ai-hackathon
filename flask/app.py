@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 from openai import OpenAI
 import datetime
 import os
-app = Flask(__name__)
+app= Flask(__name__, static_folder='../frontend/build', static_url_path='/')
+
 CORS(app)
 
 # Load OpenAI API key from environment variable
@@ -13,6 +14,10 @@ if not openai_api_key:
 
 # Initialize OpenAI client
 openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
+
+@app.route('/')
+def index():
+  return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/refine/', methods=['POST', 'GET'])
 def refine():
@@ -52,15 +57,16 @@ def refine():
     }
 
     response_headers = {
-        'Access-Control-Allow-Origin': 'http://localhost:3000',  # Update with your React frontend URL
+        'Access-Control-Allow-Origin': 'http://127.0.0.1:5001',  # Update with your React frontend URL
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '3600'
     }
 
     return jsonify(response_data), 200, response_headers
+
 @app.route('/response/', methods=['POST'])
-def index():
+def action():
     data = request.get_json()
 
     project = data['project']
@@ -86,7 +92,7 @@ def index():
 
     # Set CORS headers
     response_headers = {
-        'Access-Control-Allow-Origin': 'http://localhost:3000',  # Update with your React frontend URL
+        'Access-Control-Allow-Origin': 'http://127.0.0.1:5001',  # Update with your React frontend URL
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '3600'
