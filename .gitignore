@@ -3,9 +3,11 @@
 __pycache__/
 *.py[cod]
 *.pyo
-*.pyd
+*.pydd
 *.pyc
 *.log
+
+.vscode
 
 # Flask specific
 instance/
