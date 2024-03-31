@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from openai import OpenAI
+import datetime
 import os
-
 app = Flask(__name__)
 CORS(app)
 
@@ -59,7 +59,6 @@ def refine():
     }
 
     return jsonify(response_data), 200, response_headers
-
 @app.route('/response/', methods=['POST'])
 def index():
     data = request.get_json()
@@ -100,6 +99,42 @@ def index():
     }
 
     return jsonify(context), 200, response_headers
+
+@app.route('/save_to_ical/', methods=['POST'])
+def save_to_ical():
+    try:
+        data = request.get_json()
+        project = data['project']
+        details = data['details']
+        subtasks = data['subtasks']
+
+        ical_content = f"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//My Calendar//EN\n"
+
+        # Add project event
+        ical_content += f"BEGIN:VEVENT\n"
+        ical_content += f"SUMMARY:{project}\n"
+        ical_content += f"DESCRIPTION:{details}\n"
+        ical_content += f"DTSTART:{datetime.datetime.now().strftime('%Y%m%dT%H%M%S')}\n"
+        ical_content += f"DTEND:{datetime.datetime.now().strftime('%Y%m%dT%H%M%S')}\n"
+        ical_content += f"END:VEVENT\n"
+
+        # Add subtasks as separate events
+        for subtask in subtasks:
+            ical_content += f"BEGIN:VEVENT\n"
+            ical_content += f"SUMMARY:{subtask}\n"
+            ical_content += f"DTSTART:{datetime.datetime.now().strftime('%Y%m%dT%H%M%S')}\n"
+            ical_content += f"DTEND:{datetime.datetime.now().strftime('%Y%m%dT%H%M%S')}\n"
+            ical_content += f"END:VEVENT\n"
+
+        ical_content += "END:VCALENDAR"
+
+        # Create a response with the iCal content
+        response = Response(ical_content, mimetype='text/calendar')
+        response.headers.set('Content-Disposition', 'attachment', filename='tasks.ics')
+
+        return response
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
