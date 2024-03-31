@@ -8,9 +8,9 @@ app= Flask(__name__, static_folder='../frontend/build', static_url_path='/')
 CORS(app)
 
 # Load OpenAI API key from environment variable
-openai_api_key = os.getenv('OPENAI_API_KEY')
-if not openai_api_key:
-    raise ValueError('Your OpenAI API key is not detected in your environment variables. Please check.')
+# openai_api_key = os.getenv('OPENAI_API_KEY')
+# if not openai_api_key:
+#     raise ValueError('Your OpenAI API key is not detected in your environment variables. Please check.')
 
 # Initialize OpenAI client
 openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
