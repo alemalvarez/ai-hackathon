@@ -14,25 +14,42 @@ if not openai_api_key:
 # Initialize OpenAI client
 openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
 
-@app.route('/refine/', methods=['POST'])
+@app.route('/refine/', methods=['POST', 'GET'])
 def refine():
-    subtask = request.get_json()['subtask']
+    data = request.get_json()
 
-    instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user."""
-    prompt = f"This task is too complex: {subtask}. Further split it into three smaller tasks."
+    details = data.get('details', '')
+    project = data.get('project', '')
+    subtasks = data.get('subtasks', [])
+    status = data.get('status', [])
 
-    completion = openai_client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    response = completion.choices[0].message.content
+    instructions = f"""Based on your previous task that you broke for me for project: {project}, with details {details}.
+    I want you to fix some specific tasks that I am providing you. fix only this specific task and change nothing else.
+    """
 
-    # Parse response into a list of subtasks
-    lines = response.strip().split('\n')
-    subtasks = [line.split('. ', 1)[1] for line in lines if line.startswith(tuple(f"{i}. " for i in range(1, 11)))]
+    refined_subtasks = []
+    for subtask, task_status in zip(subtasks, status):
+        if task_status == 'keep':
+            refined_subtasks.append(subtask)
+            continue
+        elif task_status == 'remove':
+            continue  # Skip this subtask
+        else:
+            prompt = f"This subtask needs work: \"{subtask}\". This is what I feel about it: {task_status}. fix it."
+            completion = openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": instructions},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            refined_subtasks.append(completion.choices[0].message.content)
+
+    response_data = {
+        'details': details,
+        'project': project,
+        'subtasks': refined_subtasks
+    }
 
     response_headers = {
         'Access-Control-Allow-Origin': 'http://localhost:3000',  # Update with your React frontend URL
@@ -41,12 +58,7 @@ def refine():
         'Access-Control-Max-Age': '3600'
     }
 
-    context = {
-        'subtasks': subtasks
-    }
-
-    print(context)
-    return jsonify(context), 200, response_headers
+    return jsonify(response_data), 200, response_headers
 
 @app.route('/response/', methods=['POST'])
 def index():
