@@ -19,21 +19,20 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Change directory to frontend
-        run: cd frontend
-
       - name: Install frontend dependencies
-        run: npm install
+        run: |
+          cd frontend
+          npm install
 
       - name: Build frontend
-        run: npm run build
+        run: |
+          cd frontend
+          npm run build
 
       - name: Move built files back to the root directory
-        run: mv build ../
-
-      # Go back to the root directory for backend build
-      - name: Go back to root directory
-        run: cd ..
+        run: |
+          cd frontend
+          mv build ../
 
       # Build the Python Flask backend
       - name: Set up Python version
