@@ -1,12 +1,17 @@
+import logging
 from flask import Flask, request, jsonify, Response, send_from_directory
 from openai import OpenAI
 import datetime
 import os
-app= Flask(__name__, static_folder='build', static_url_path='/')
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+app = Flask(__name__, static_folder='build', static_url_path='/')
 
 # Load OpenAI API key from environment variable
 # openai_api_key = os.getenv('OPENAI_API_KEY')
-# if not openai_api_key:git
+# if not openai_api_key:
 #     raise ValueError('Your OpenAI API key is not detected in your environment variables. Please check.')
 
 # Initialize OpenAI client
@@ -14,11 +19,14 @@ openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
 
 @app.route('/')
 def index():
-  return send_from_directory(app.static_folder, 'index.html')
+    logging.info('Received request for index route')
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/refine/', methods=['POST', 'GET'])
 def refine():
+    logging.info('Received request for /refine route')
     data = request.get_json()
+    logging.debug(f'Received data: {data}')
 
     details = data.get('details', '')
     project = data.get('project', '')
@@ -38,6 +46,7 @@ def refine():
             continue  # Skip this subtask
         else:
             prompt = f"This subtask needs work: \"{subtask}\". This is what I feel about it: {task_status}. fix it."
+            logging.info('Sending completion request to OpenAI API')
             completion = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -45,6 +54,7 @@ def refine():
                     {"role": "user", "content": prompt}
                 ]
             )
+            logging.debug(f'Received response from OpenAI API: {completion.choices[0].message.content}')
             refined_subtasks.append(completion.choices[0].message.content)
 
     response_data = {
@@ -53,11 +63,14 @@ def refine():
         'subtasks': refined_subtasks
     }
 
+    logging.info('Returning response with refined subtasks')
     return jsonify(response_data), 200
 
 @app.route('/response/', methods=['POST'])
 def action():
+    logging.info('Received POST request for /response route')
     data = request.get_json()
+    logging.debug(f'Received data: {data}')
 
     project = data['project']
     details = data['details']
@@ -67,6 +80,7 @@ def action():
     prompt = f"You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"
 
     # Request completion from OpenAI API
+    logging.info('Sending completion request to OpenAI API')
     completion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -74,6 +88,7 @@ def action():
             {"role": "user", "content": prompt}
         ]
     )
+    logging.debug(f'Received response from OpenAI API: {completion.choices[0].message.content}')
     response = completion.choices[0].message.content
 
     # Parse response into a list of subtasks
@@ -86,12 +101,15 @@ def action():
         'subtasks': subtasks
     }
 
+    logging.info('Returning response with subtasks')
     return jsonify(context), 200
 
 @app.route('/save_to_ical/', methods=['POST'])
 def save_to_ical():
     try:
+        logging.info('Received POST request for /save_to_ical route')
         data = request.get_json()
+        logging.debug(f'Received data: {data}')
         project = data['project']
         details = data['details']
         subtasks = data['subtasks']
@@ -120,8 +138,10 @@ def save_to_ical():
         response = Response(ical_content, mimetype='text/calendar')
         response.headers.set('Content-Disposition', 'attachment', filename='tasks.ics')
 
+        logging.info('Returning iCal file response')
         return response
     except Exception as e:
+        logging.error(f'Error occurred: {e}')
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

@@ -45,11 +45,11 @@ function App() {
   // Backend Function: Handle what happens when a user submits their input.
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submitting form...');
 
     try {
-      console.log('Submitting form...');
-      
-      const response = await fetch('https://chunkify.azurewebsites.net/response', {
+      console.log('Sending POST request to /response');
+      const response = await fetch('/response', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,6 +60,7 @@ function App() {
       console.log('Response received:', response);
 
       if (!response.ok) {
+        console.error('Network response was not ok');
         throw new Error('Network response was not ok');
       }
 
@@ -75,9 +76,8 @@ function App() {
   // Backend Function: Handle what happens when a user clicks the Get Started button.
   const handleGetRequest = async () => {
     try {
-      console.log('Sending GET request...');
-      
-      const response = await fetch('https://chunkify.azurewebsites.net/response');
+      console.log('Sending GET request to /response');
+      const response = await fetch('/response');
       console.log('Response received:', response);
 
       const data = await response.json();
@@ -90,11 +90,13 @@ function App() {
 
   // Function: Handle what happens when a user submits their input.
   const handleInputSubmit = () => {
+    console.log('Handling input submit');
     setOutputData(['Output 1', 'Output 2', 'Output 3']); // Pretend processing
   };
 
   // Function: Handle what happens when a user clicks the Get Started button.
   const handleGetStartedClick = () => {
+    console.log('Handling Get Started click');
     setIsAnimating(true); // Start the animation
     setTimeout(() => {
       setShowMainPage(true); // Switch to the main page after the animation ends
@@ -104,7 +106,10 @@ function App() {
 
   // Function: Listen for the Enter key press to submit the input.
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') handleInputSubmit();
+    if (e.key === 'Enter') {
+      console.log('Enter key pressed');
+      handleInputSubmit();
+    }
   };
 
   // Main Render
@@ -124,55 +129,40 @@ function App() {
         ) : (
           // Main page content
           <div className={`main-page-wrapper animated ${showMainPage && !isAnimating ? 'slide-in-right-fade-in' : ''}`}>
-            {/* <input 
-              type="text" 
-              value={inputValue} 
-              onChange={(e) => setInputValue(e.target.value)} 
-              placeholder="Enter task here" 
-              onKeyPress={handleKeyPress}
-            />
-            {outputData.length > 0 && (
-              <div className="ai-popup-container">
-                <h2>Break down into these tasks?</h2>
-                <ol>
-                  {outputData.map((item, index) => <li key={index}>{item}</li>)}
-                </ol>
+            <form onSubmit={handleSubmit}>
+              {/*<!-- Project --> */} 
+              <label htmlFor="project">Project:</label>
+              <input
+                type="text"
+                id="project"
+                value={project}
+                onChange={(e) => setProject(e.target.value)}
+                placeholder="What you want to do" 
+                onKeyPress={handleKeyPress}
+              />
+              {/*<!-- Details --> */} 
+              <label htmlFor="details">Details:</label>
+              <input
+                type="text"
+                id="details"
+                value={details}
+                placeholder="Additional details"
+                onChange={(e) => setDetails(e.target.value)}
+              />
+              <button type="submit">Submit</button>
+            </form>
+            <button onClick={handleGetRequest}>Fetch Data</button>
+            {subtasks.length > 0 && (
+              <div>
+                <h2>Subtasks:</h2>
+                <ul>
+                  {subtasks.map((subtask, index) => (
+                    <li key={index}>{subtask}</li>
+                  ))}
+                </ul>
               </div>
-            )} */}
-      <form onSubmit={handleSubmit}>
-        {/*<!-- Project --> */} 
-        <label htmlFor="project">Project:</label>
-        <input
-          type="text"
-          id="project"
-          value={project}
-          onChange={(e) => setProject(e.target.value)}
-          placeholder="What you want to do" 
-          onKeyPress={handleKeyPress}
-        />
-        {/*<!-- Details --> */} 
-        <label htmlFor="details">Details:</label>
-        <input
-          type="text"
-          id="details"
-          value={details}
-          placeholder="Additional details"
-          onChange={(e) => setDetails(e.target.value)}
-        />
-        <button type="submit">Submit</button>
-      </form>
-      <button onClick={handleGetRequest}>Fetch Data</button>
-      {subtasks.length > 0 && (
-        <div>
-          <h2>Subtasks:</h2>
-          <ul>
-            {subtasks.map((subtask, index) => (
-              <li key={index}>{subtask}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {error && <p>{error}</p>}
+            )}
+            {error && <p>{error}</p>}
           </div>
         )}
       </div>
