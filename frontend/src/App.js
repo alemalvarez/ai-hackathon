@@ -49,7 +49,7 @@ function App() {
     try {
       console.log('Submitting form...');
       
-      const response = await fetch('http://localhost/response/', {
+      const response = await fetch('/response', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ function App() {
     try {
       console.log('Sending GET request...');
       
-      const response = await fetch('http://localhost/response/');
+      const response = await fetch('/response');
       console.log('Response received:', response);
 
       const data = await response.json();
