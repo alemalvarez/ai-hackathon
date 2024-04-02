@@ -3,12 +3,16 @@ from flask import Flask, request, jsonify, Response, send_from_directory
 from openai import OpenAI
 import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__, static_folder='build', static_url_path='/')
 
+# This code breaks in Azure
 # Load OpenAI API key from environment variable
 # openai_api_key = os.getenv('OPENAI_API_KEY')
 # if not openai_api_key:
@@ -16,6 +20,16 @@ app = Flask(__name__, static_folder='build', static_url_path='/')
 
 # Initialize OpenAI client
 openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
+
+# Check if running in development environment
+is_dev = os.getenv('FLASK_ENV') == 'development'
+
+# CORS configuration ONLY running on dev. This won't run on prod.
+if is_dev:
+    logging.info("WARNING: CORS enabled. Hope you're not in production ;)")
+    from flask_cors import CORS
+    CORS(app, origins=os.getenv('CORS_ORIGIN'))
+
 
 @app.route('/')
 def index():
@@ -144,5 +158,6 @@ def save_to_ical():
         logging.error(f'Error occurred: {e}')
         return jsonify({'error': str(e)}), 500
 
+# This only runs if called with 'python3 app.py'. Port has to be passed to flask by CLI parameter.
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port=5001)

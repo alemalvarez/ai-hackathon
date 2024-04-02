@@ -5,6 +5,7 @@ import './Animations.css';
 
 // LoginPage Component (Based off template)
 function LoginPage() {
+  
   // Using Auth0 hooks for authentication
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
@@ -49,7 +50,7 @@ function App() {
 
     try {
       console.log('Sending POST request to /response');
-      const response = await fetch('/response/', {
+      const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/response/' : '/response/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ function App() {
   const handleGetRequest = async () => {
     try {
       console.log('Sending GET request to /response');
-      const response = await fetch('/response/');
+      const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/response/' : '/response/');
       console.log('Response received:', response);
 
       const data = await response.json();
