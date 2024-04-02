@@ -1,10 +1,11 @@
 import logging
 from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
-from openai import OpenAI
+import anthropic
 import datetime
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -20,8 +21,8 @@ app = Flask(__name__, static_folder='build', static_url_path='/')
 # if not openai_api_key:
 #     raise ValueError('Your OpenAI API key is not detected in your environment variables. Please check.')
 
-# Initialize OpenAI client
-openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
+anthropic_client = anthropic.Anthropic()
+
 
 # Check if running in development environment
 is_dev = os.getenv('FLASK_ENV') == 'development'
@@ -63,13 +64,14 @@ def refine():
         else:
             prompt = f"This subtask needs work: \"{subtask}\". This is what I feel about it: {task_status}. fix it."
             logging.info('Sending completion request to OpenAI API')
-            completion = openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": instructions},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            # completion = openai_client.chat.completions.create(
+            #     model="gpt-3.5-turbo",
+            #     messages=[
+            #         {"role": "system", "content": instructions},
+            #         {"role": "user", "content": prompt}
+            #     ]
+            # )
+            
             logging.debug(f'Received response from OpenAI API: {completion.choices[0].message.content}')
             refined_subtasks.append(completion.choices[0].message.content)
 
@@ -92,24 +94,30 @@ def action():
     details = data['details']
 
     # Prepare prompt for OpenAI completion
-    instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user."""
+    instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user.
+    You will return the chunks as elements on a JSON list, like ['subtask 1', 'subtask 2', 'subtask 3',...]"""
     prompt = f"You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"
 
     # Request completion from OpenAI API
-    logging.info('Sending completion request to OpenAI API')
-    completion = openai_client.chat.completions.create(
-        model="gpt-3.5-turbo",
+    logging.info('Sending completion request to Anthropic')
+    message = anthropic_client.messages.create(
+        model="claude-3-haiku-20240307",
+        max_tokens=1000,
+        temperature=0.0,
+        system=instructions,
         messages=[
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt},
+            {"role": "assistant", "content":"["}
         ]
     )
-    logging.debug(f'Received response from OpenAI API: {completion.choices[0].message.content}')
-    response = completion.choices[0].message.content
 
-    # Parse response into a list of subtasks
-    lines = response.strip().split('\n')
-    subtasks = [line.split('. ', 1)[1] for line in lines if line.startswith(tuple(f"{i}. " for i in range(1, 11)))]
+    logging.debug(f'Received response from Anthropic API: {message.content}')
+
+    response = message.content[0].text
+    response = f"[{response}"
+    logging.info(f"\n{response}\n")
+    # Parse the JSON string
+    subtasks = json.loads(response)
 
     context = {
         'project': project,
