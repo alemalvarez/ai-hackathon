@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 # Python-related files
 __pycache__/
 *.py[cod]
@@ -7,6 +7,7 @@ __pycache__/
 *.pyc
 *.log
 *.ipynb
+
 .vscode
 
 # Flask specific
