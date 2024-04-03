@@ -23,6 +23,8 @@ app = Flask(__name__, static_folder='build', static_url_path='/')
 
 anthropic_client = anthropic.Anthropic()
 
+anthropic_client = anthropic.Anthropic()
+
 
 # Check if running in development environment
 is_dev = os.getenv('FLASK_ENV') == 'development'
