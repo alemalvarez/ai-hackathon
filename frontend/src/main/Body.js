@@ -4,6 +4,22 @@ import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
 
+// Component: AI Task Suggestions Popup
+function AIPopup({ subtasks }) {
+    return (
+        <div className="ai-popup-container">
+            <h2>Tasks</h2>
+            <ol>
+                {subtasks.map((subtask, index) => (
+                    <li key={index}>{subtask}</li>
+                ))}
+            </ol>
+        </div>
+    );
+}
+
+
+// Component: Main Body of the App
 function Body() {
     const [project, setProject] = useState('');
     const [details, setDetails] = useState('');
@@ -32,7 +48,6 @@ function Body() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Submitting form...');
-
         try {
             console.log('Sending POST request to /response');
             const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/response/' : '/response/', {
@@ -49,7 +64,6 @@ function Body() {
                 console.error('Network response was not ok');
                 throw new Error('Network response was not ok');
             }
-
             const data = await response.json();
             console.log('Data received:', data);
             setSubtasks(data.subtasks);
@@ -58,7 +72,6 @@ function Body() {
             setError('An error occurred while fetching data.');
         }
     };
-
 
     // Function: Listen for the Enter key press to submit the input.
     const handleKeyPress = (e) => {
@@ -111,14 +124,7 @@ function Body() {
                     {/* <button type="submit">Submit</button> */}
                 </form>
                 {subtasks.length > 0 && (
-                    <div>
-                        <h2>Subtasks:</h2>
-                        <ul>
-                            {subtasks.map((subtask, index) => (
-                                <li key={index}>{subtask}</li>
-                            ))}
-                        </ul>
-                    </div>
+                    <AIPopup subtasks={subtasks} />
                 )}
                 {error && <p>{error}</p>}
             </div>
