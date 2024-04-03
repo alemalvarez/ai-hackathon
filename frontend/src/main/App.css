@@ -2,12 +2,12 @@
 /* Fonts */
 @font-face { 
   font-family: "SF Pro";
-  src: url('fonts/SF-Pro-Text-Thin.otf') format('opentype');
+  src: url('../fonts/SF-Pro-Text-Thin.otf') format('opentype');
   font-weight: 300;
 }
 @font-face { 
   font-family: "SF Pro Display - Ultralight";
-  src: url('fonts/SF-Pro-Display-Ultralight.woff2') format('opentype');
+  src: url('../fonts/SF-Pro-Display-Ultralight.woff2') format('opentype');
 }
 
 * {
@@ -143,3 +143,40 @@ li:before {
   margin-right: 10px; 
 }
 
+
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+/* Google Sign In Button */
+.google-sign-in-button {
+  display: flex;
+  flex-direction: row;
+  padding: 22px 24px;
+  font-family: "SF Pro";
+  font-size: 24px;
+  font-weight: 700;
+  border: 0.7px solid rgb(82, 82, 82);
+  box-shadow: 5px 4px 3px rgb(182, 182, 182);
+  border-radius: 40px;
+  background-color: white;
+  transition: background-color 0.8s ease, transform 0.8s ease;
+}
+  /* Google Sign In Button - On Click */
+  .google-sign-in-button:active {
+    transform: translate(2px,2px);
+    box-shadow: 3.3px 2.3px 3px rgb(182, 182, 182);
+    background-color: rgb(241, 241, 241);
+  }
+
+  /* Google Logo (For Sign In Button) */
+  .google-logo {
+    display: flex;
+    align-self: center;
+    justify-self: center;
+    aspect-ratio: 1/1;
+    width: 30px;
+    margin-right: 14px;
+  }

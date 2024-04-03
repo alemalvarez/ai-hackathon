@@ -1,5 +1,6 @@
 import logging
 from flask import Flask, request, jsonify, Response, send_from_directory
+from flask_cors import CORS
 from openai import OpenAI
 import datetime
 import os
@@ -11,8 +12,9 @@ load_dotenv()
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__, static_folder='build', static_url_path='/')
-
+CORS(app, resources={r"/*": {"origins": "*"}})
 # This code breaks in Azure
+
 # Load OpenAI API key from environment variable
 # openai_api_key = os.getenv('OPENAI_API_KEY')
 # if not openai_api_key:

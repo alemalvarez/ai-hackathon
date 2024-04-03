@@ -7,7 +7,7 @@ Andrew DeOrio <awdeorio@umich.edu>
 from setuptools import setup
 
 setup(
-    name='insta485',
+    name='ai-hackathon',
     version='0.1.0',
     packages=['insta485'],
     include_package_data=True,
