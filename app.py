@@ -12,7 +12,7 @@ load_dotenv()
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__, static_folder='build', static_url_path='/')
-CORS(app, resources={r"/*": {"origins": "*"}})
+
 # This code breaks in Azure
 
 # Load OpenAI API key from environment variable
