@@ -79,10 +79,11 @@ function Body() {
         return (
             <div className={`main-page-wrapper animated ${showMainPage && !isAnimating ? 'slide-in-right-fade-in' : ''}`}>
                 <img 
+                className="google-profile-picture"
                 src={user.picture} 
                 alt={`Log out ${user.name}`} 
                 onClick={() => logout({ returnTo: window.location.origin })}
-                style={{cursor: 'pointer'}} // This makes the mouse cursor change to a pointer when hovering over the image, indicating it's clickable.
+                style={{cursor: 'pointer'}} 
                 />
                 <form onSubmit={handleSubmit}>
                     {/*<!-- Project --> */}
@@ -125,7 +126,7 @@ function Body() {
     else {
         return (
             <div className="login-page">
-                <button className="google-sign-in-button" onClick={loginWithRedirect}>
+                    <button className="google-sign-in-button" onClick={() => loginWithRedirect({ connection: 'google-oauth2' })}>
                     <img src={GoogleLogo} className="google-logo" alt="Google Logo" />
                     Sign In with Google
                 </button>
