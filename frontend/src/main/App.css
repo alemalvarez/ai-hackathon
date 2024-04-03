@@ -85,15 +85,63 @@
     background-color: rgba(46, 118, 253, 0.8)
   }
 
+/* Form: Task & Details Input Field */
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-/* Input Text Field: 'Enter Task Here' */
+/* Input Text Fields for Task, Details */
 input {
   font-family: "SF Pro Display - Ultralight";
   font-weight: 500;
-  width: 450px;
+  width: 100%;
   margin-top: 12px;
-  font-size: 20px;
+  font-size: 28px;
 }
+
+/* Task Wrapper (Input Field, Toggle Button) */
+.task-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Triangle for Dropdown */
+.triangle {
+  display: flex;
+  width: 0;
+  height: 0;
+  margin-left: 8px;
+  margin-top: 5px;
+  border-left: 10px solid transparent; 
+  border-right: 10px solid transparent; 
+  border-bottom: 17px solid rgb(175, 175, 175); 
+  transform: rotate(180deg);
+  cursor: pointer;
+}
+  .triangle.open {
+    transform: rotate(0deg); /* Flip the triangle */
+  }
+
+
+/* Details Input Field */
+.details-input {
+  animation-name: slideIn;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+  /* Details Input Field - Hiding the input field, plays reverse animation */
+  .details-input.hiding {
+    animation-name: slideOut;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+  }
+
+
 
 /* AI Pop-Up Container, appears after user inputs task */ 
 .ai-popup-container {
@@ -192,3 +240,4 @@ li:before {
     border-radius: 50%;
     margin-right: 10px;
   }
+

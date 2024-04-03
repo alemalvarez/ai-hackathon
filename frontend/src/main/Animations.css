@@ -24,6 +24,30 @@
     }
 }
 
+/* Slide in from the top and fade in */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px); /* Start above */
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Slide out to the top and fade out */
+@keyframes slideOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+}
+
 /* Animation classes */
 .slide-out-right-fade-out {
     animation: slideOutRightFadeOut 0.4s forwards;
