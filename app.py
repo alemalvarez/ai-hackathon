@@ -13,7 +13,6 @@ load_dotenv()
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__, static_folder='build', static_url_path='/')
-
 # This code breaks in Azure
 
 # Load OpenAI API key from environment variable
@@ -31,7 +30,7 @@ is_dev = os.getenv('FLASK_ENV') == 'development'
 if is_dev:
     logging.info("WARNING: CORS enabled. Hope you're not in production ;)")
     from flask_cors import CORS
-    CORS(app, origins=os.getenv('CORS_ORIGIN'))
+    CORS(app)
 
 
 @app.route('/')
@@ -44,17 +43,13 @@ def refine():
     logging.info('Received request for /refine route')
     data = request.get_json()
     logging.debug(f'Received data: {data}')
-
     details = data.get('details', '')
     project = data.get('project', '')
     subtasks = data.get('subtasks', [])
     status = data.get('status', [])
-
-    instructions = f"""Based on your previous task that you broke for me for project: {project}, with details {details}.
-    I want you to fix some specific tasks that I am providing you. fix only this specific task and change nothing else.
-    """
-
+    instructions = f"""Based on your previous task that you broke for me for project: {project}, with details {details}. I want you to fix some specific tasks that I am providing you. fix only this specific task and change nothing else. """
     refined_subtasks = []
+
     for subtask, task_status in zip(subtasks, status):
         if task_status == 'keep':
             refined_subtasks.append(subtask)
@@ -63,27 +58,28 @@ def refine():
             continue  # Skip this subtask
         else:
             prompt = f"This subtask needs work: \"{subtask}\". This is what I feel about it: {task_status}. fix it."
-            logging.info('Sending completion request to OpenAI API')
-            # completion = openai_client.chat.completions.create(
-            #     model="gpt-3.5-turbo",
-            #     messages=[
-            #         {"role": "system", "content": instructions},
-            #         {"role": "user", "content": prompt}
-            #     ]
-            # )
-            
-            logging.debug(f'Received response from OpenAI API: {completion.choices[0].message.content}')
-            refined_subtasks.append(completion.choices[0].message.content)
+            logging.info('Sending completion request to Anthropic API')
+            completion = anthropic_client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=1000,
+                temperature=0.0,
+                system=instructions,
+                messages=[
+                    {"role": "user", "content": prompt},
+                    {"role": "assistant", "content": "["}
+                ]
+            )
+            refined_subtask = completion.content[0].text
+            logging.debug(f'Received response from Anthropic API: {refined_subtask}')
+            refined_subtasks.append(refined_subtask)
 
     response_data = {
         'details': details,
         'project': project,
         'subtasks': refined_subtasks
     }
-
     logging.info('Returning response with refined subtasks')
     return jsonify(response_data), 200
-
 @app.route('/response/', methods=['POST'])
 def action():
     logging.info('Received POST request for /response route')
