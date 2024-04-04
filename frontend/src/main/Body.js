@@ -3,7 +3,8 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
-
+import { firestore } from './firebaseconfig.js';
+import { collection, addDoc } from 'firebase/firestore';
 // Component: AI Task Suggestions Popup
 function AIPopup({ subtasks }) {
     return (
@@ -30,6 +31,9 @@ function Body() {
     const [showMainPage] = useState(false);
     const [showDetails, setShowDetails] = useState(false); // State to show/hide the details input field
     const [hidingDetails, setHidingDetails] = useState(false); // New state to manage hiding animation
+    const [apiResponse, setApiResponse] = useState(null); // State to store API response temporarily
+    const [isSaving, setIsSaving] = useState(false); // State to track if saving to Firestore is in progress
+
 
     // Function: Toggle details visibility
     const toggleDetails = () => {
@@ -44,6 +48,25 @@ function Body() {
         }
     };
 
+// Function: Handle saving to Firestore
+const handleSaveToFirestore = async () => {
+    setIsSaving(true); // Set saving state to true
+    try {
+        console.log('Storing data in Firestore');
+        const docRef = await addDoc(collection(firestore, 'responses'), {
+            ...apiResponse, // Save the API response data
+            timestamp: new Date().toISOString(),
+            userId: user.sub, // Assuming user.sub contains the unique user identifier (UID)
+        });
+        console.log('Document written with ID: ', docRef.id);
+        setApiResponse(null); // Clear the temporary API response data
+    } catch (error) {
+        console.error('Error storing data in Firestore:', error);
+        setError('An error occurred while storing data.');
+    } finally {
+        setIsSaving(false); // Set saving state back to false after Firestore operation
+    }
+};
     // Function: Handle what happens when a user submits their input.
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -67,12 +90,30 @@ function Body() {
             const data = await response.json();
             console.log('Data received:', data);
             setSubtasks(data.subtasks);
+            setApiResponse(data);
         } catch (error) {
             console.error('Error:', error);
             setError('An error occurred while fetching data.');
         }
     };
-
+    // const handleSaveToFirestore = async () => {
+    //     setIsSaving(true); // Set saving state to true
+    //     try {
+    //         console.log('Storing data in Firestore');
+    //         await firestore.collection('responses').add({
+    //             ...apiResponse, // Save the API response data
+    //             timestamp: new Date().toISOString(),
+    //             userId: user.sub, // Assuming user.sub contains the unique user identifier (UID)
+    //         });
+    //         console.log('Data stored in Firestore');
+    //         setApiResponse(null); // Clear the temporary API response data
+    //     } catch (error) {
+    //         console.error('Error storing data in Firestore:', error);
+    //         setError('An error occurred while storing data.');
+    //     } finally {
+    //         setIsSaving(false); // Set saving state back to false after Firestore operation
+    //     }
+    // };
     // Function: Listen for the Enter key press to submit the input.
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -121,6 +162,16 @@ function Body() {
                             className={`details-input ${hidingDetails ? 'hiding' : ''}`}
                         />
                     )}
+                    {/* Save button for API response */}
+                <button type="button" onClick={handleSubmit} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Get API Response'}
+                </button>
+                {/* Save button for Firestore */}
+                {apiResponse && (
+                    <button type="button" onClick={handleSaveToFirestore} disabled={isSaving}>
+                        {isSaving ? 'Saving to Firestore...' : 'Save to Firestore'}
+                    </button>
+                )}
                     {/* <button type="submit">Submit</button> */}
                 </form>
                 {subtasks.length > 0 && (
