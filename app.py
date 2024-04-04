@@ -122,7 +122,6 @@ def action():
     logging.info(f"\n{response}\n")
     # Parse the JSON string
     subtasks = json.loads(response)
-
     context = {
         'project': project,
         'details': details,
