@@ -4,7 +4,7 @@ import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
 import { firestore } from './firebaseconfig.js';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 // Component: AI Task Suggestions Popup
 function AIPopup({ subtasks }) {
     return (
@@ -83,6 +83,18 @@ const handleSaveToFirestore = async () => {
         }
     
     };
+    const deleteTask = async (taskId) => {
+        try {
+            await deleteDoc(doc(collection(firestore, 'queries'), taskId));
+            console.log('Task deleted successfully');
+            // Refresh the tasks list after deletion
+            const tasks = await getTasksForUser(user?.sub);
+            renderTasks(tasks);
+        } catch (error) {
+            console.error('Error deleting task from Firestore:', error);
+            setError('An error occurred while deleting task.');
+        }
+    };
     const renderTasks = (tasks) => {
         const tasksListElement = document.getElementById('tasksList');
     
@@ -94,21 +106,33 @@ const handleSaveToFirestore = async () => {
             const taskElement = document.createElement('div');
             taskElement.innerHTML = `
                 <div>Project: ${task.project}</div>
+                <button class="delete-btn" data-task-id="${task.id}">Delete</button>
                 <hr>
             `;
             tasksListElement.appendChild(taskElement);
         });
+        tasksListElement.addEventListener('click', async (event) => {
+            if (event.target.classList.contains('delete-btn')) {
+                event.preventDefault(); // P
+                const taskId = event.target.dataset.taskId;
+                await deleteTask(taskId);
+            }
+        });
     };
     const getTasksForUser = async (userId) => {
         try {
-            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', userId)));
+            console.log('Fetching tasks for user:', userId); // Log user ID for debugging
+            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
             const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             return tasks;
         } catch (error) {
             console.error('Error fetching tasks from Firestore:', error);
-            throw new Error('An error occurred while fetching tasks.');
+            throw new Error('An error occurred while fetching tasks. Please try again later.'); // Update error message if needed
         }
     };
+    
+    
+
     
     // Function: Handle what happens when a user submits their input.
     const handleSubmit = async (e) => {
