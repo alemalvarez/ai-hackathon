@@ -43,39 +43,47 @@ def refine():
     logging.info('Received request for /refine route')
     data = request.get_json()
     logging.debug(f'Received data: {data}')
+
     details = data.get('details', '')
     project = data.get('project', '')
-    subtasks = data.get('subtasks', [])
-    status = data.get('status', [])
-    instructions = f"""Based on your previous task that you broke for me for project: {project}, with details {details}. I want you to fix some specific tasks that I am providing you. fix only this specific task and change nothing else. """
-    refined_subtasks = []
+    subtask = data.get('subtask', '')
+    feedback = data.get('feedback', '')
 
-    for subtask, task_status in zip(subtasks, status):
-        if task_status == 'keep':
-            refined_subtasks.append(subtask)
-            continue
-        elif task_status == 'remove':
-            continue  # Skip this subtask
-        else:
-            prompt = f"This subtask needs work: \"{subtask}\". This is what I feel about it: {task_status}. fix it."
-            logging.info('Sending completion request to Anthropic API')
-            completion = anthropic_client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=1000,
-                temperature=0.0,
-                system=instructions,
-                messages=[
-                    {"role": "user", "content": prompt},
-                    {"role": "assistant", "content": "["}
-                ]
-            )
-            refined_subtask = completion.content[0].text
-            logging.debug(f'Received response from Anthropic API: {refined_subtask}')
-            refined_subtasks.append(refined_subtask)
+    instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user.
+    You will return the chunks as elements on a JSON list, like ['subtask1', 'subtask2', 'subtask3',...].
+    If later you are asked to break down a subtask into multiple subtasks, you will also return a JSON file, like ['subtask1.1', 'subtask1.2]. Don't numerate them.
+    If later you are asked to refine a task, you will return a JSON array with one single entry containing the refined subtask, like ['better_subtask1']. the maximum length of subtasks should be 3.
+    """
+
+    prompt = f"""You generated this subtask: {subtask} as part of my complex task {project} with these details {details}.
+    I think that it needs some refinement: {feedback}.
+    """
+
+    logging.info('Sending completion request to Anthropic API')
+    completion = anthropic_client.messages.create(
+        model="claude-3-sonnet-20240229",
+        max_tokens=1000,
+        temperature=0.0,
+        system=instructions,
+        messages=[
+            {"role": "user", "content": prompt},
+            {"role": "assistant", "content": "["}
+        ]
+    )
+    refined_subtask = completion.content[0].text
+    logging.debug(f'Received response from Anthropic API: {refined_subtask}')
+
+    # Splitting the generated subtasks into chunks of maximum length 3
+    refined_subtasks = [refined_subtask[i:i + 3] for i in range(0, len(refined_subtask), 3)]
+
+    response = json.dumps(refined_subtasks)
+
+    logging.info(f"\n{response}\n")
 
     response_data = {
         'details': details,
         'project': project,
+        'subtask': subtask,
         'subtasks': refined_subtasks
     }
     logging.info('Returning response with refined subtasks')
