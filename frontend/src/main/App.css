@@ -11,7 +11,13 @@
 }
 
 * {
+  --imessage-blue: #278cff;
+  --imessage-gray: rgb(239, 239, 239);
+  --imessage-gray-dark: rgb(183, 183, 183);
+  --delete-red: rgb(252, 113, 113);
   font-family: "SF Pro";
+  margin: 0;
+  padding: 0;
 }
 
 /* App Background */
@@ -22,12 +28,15 @@
   text-align: center;
   min-height: 100vh;
   background-color: white;
-  color: black;
 }
 
 /* App */
 .app {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
   margin-top: 10%;
 }
 
@@ -36,25 +45,25 @@
   height: auto;
   margin: 0 0 14px 0;
   padding: 0;
-
   font-family: 'SF Pro', sans-serif;
   font-weight: 300;
   font-size: 70px;
-}
+} 
 
 /* App Header - Title & Logo */
 .app-header {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  margin-bottom: 20px;
 }
 
 /* App Logo */
 .app-logo {
-  aspect-ratio: 1/1;
-  width: 110px;
-  margin: 0 0 0 0;
-  padding: 0;
+  height: 95px;
+  width: 90px;
+  margin-left: 25px;
+  padding: 0px;
 }
 
 /* App Slogan */
@@ -85,11 +94,52 @@
     background-color: rgba(46, 118, 253, 0.8)
   }
 
+/* Main Page */
+.main-page {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  margin-top: 16px;
+  gap: 20px;
+}
+
+/* Main Page - Both Sides */
+.main-left, .main-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100%;
+  min-height: 600px;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+/* Main Page - Left Side */
+.main-left {
+  display: flex;
+  height: 100%; 
+  width: 400px;
+  transform: translateX(40px);
+}
+
+/* Main Page - Right Side */
+.main-right {
+  margin-top: 35px;
+  width: 500px;
+  background-color: var(--imessage-gray);
+}
+
+/* Main Left Side: User Tasks & Input ------------------------------- */
+
 /* Form: Task & Details Input Field */
 .form {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 /* Input Text Fields for Task, Details */
@@ -97,17 +147,35 @@ input {
   font-family: "SF Pro Display - Ultralight";
   font-weight: 500;
   width: 100%;
-  margin-top: 12px;
-  font-size: 28px;
+  padding: 4px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 30px;
 }
+  /* Input Text Fields - Placeholder */
+  .input-field::placeholder {
+    color: rgb(162, 162, 162);
+  }
 
-/* Task Wrapper (Input Field, Toggle Button) */
-.task-wrapper {
+/* User Task Input Wrapper (Input Field, Toggle Button) */
+.user-task-input-wrapper {
   display: flex;
   flex-direction: row;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100%;
+}
+
+/* Toggle Container with 'Optional: Add Details' & Toggle Button */
+.toggle-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  cursor: pointer;
+  margin: 0 0 0 5px;
+  width: 100%;
+  font-size: 14px;
 }
 
 /* Triangle for Dropdown */
@@ -115,18 +183,17 @@ input {
   display: flex;
   width: 0;
   height: 0;
-  margin-left: 8px;
-  margin-top: 5px;
-  border-left: 10px solid transparent; 
-  border-right: 10px solid transparent; 
-  border-bottom: 17px solid rgb(175, 175, 175); 
+  margin-top: 3px;
+  margin-left: 6px;
+  border-left: 4.5px solid transparent; 
+  border-right: 4.5px solid transparent; 
+  border-bottom: 8px solid rgb(175, 175, 175); 
   transform: rotate(180deg);
   cursor: pointer;
 }
   .triangle.open {
     transform: rotate(0deg); /* Flip the triangle */
   }
-
 
 /* Details Input Field */
 .details-input {
@@ -141,17 +208,92 @@ input {
     animation-fill-mode: forwards;
   }
 
+/* User Tasks Container */
+.user-tasks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  border-radius: 16px;
+  margin-top: 20px;
+  padding: 15px;
+}
 
+/* Wrapper for User Task List & Delete Button */
+.user-task-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* User Task List */
+ol.user-task-list {
+  counter-reset: my-counter; /* Reset the counter for the numbering */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 20px 0;
+  padding: 0;
+  list-style-type: none;
+  font-size: 32px;
+}
+
+/* User Task Delete Button */
+.user-task-delete-button {
+  aspect-ratio: 1/1;
+  width: 38px;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: var(--delete-red);
+  font-family: "SF Pro";
+  font-weight: 900;
+  color:white;
+}
+
+/* Individual User Task's Numbered Circle */
+li.user-task:before {
+  content: counter(my-counter); /* Increment the counter */
+  counter-increment: my-counter; 
+  display: inline-block;
+  aspect-ratio: 1/1;
+  height: 25px; 
+  line-height: 25px; 
+  text-align: center; 
+  border-radius: 50%; 
+  background-color: rgb(0, 92, 221); 
+  color: #fff; 
+  font-weight: 600; 
+  margin-right: 10px; 
+}
+
+
+
+
+
+/* Main Right Side: AI Suggestions ------------------------------- */
+
+/* Main Right Header: Chunkify AI Suggestions */
+.main-right h2 {
+  display: flex;
+  align-self: center;
+  font-size: 28px;
+  margin-top: 5px;
+}
 
 /* AI Pop-Up Container, appears after user inputs task */ 
 .ai-popup-container {
+  display: flex;
+  flex-direction: column;
   z-index: 1;
   width: auto;
   height: auto;
-  margin: 20px 0 0 0;
   padding: 15px 20px;
   border-radius: 10px;
-  background-color: rgba(203, 203, 203, 0.4);
+  font-weight: 700;
 }
 
 /* AI Pop-Up Title */
@@ -160,12 +302,25 @@ input {
   margin: 0 0 5px 0;
 }
 
-/* List of Tasks */
-ol {
+/* Submit Button */
+.submit-button {
+  aspect-ratio: 1/1;
+  margin-left: 10px;
+  width: 45px;
+  border: none;
+  background-image: url('../images/send-icon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: white;
+}
+
+/* List of AI Tasks Suggestions */
+ol.ai-task-list {
   counter-reset: my-counter; /* Reset the counter for the numbering */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  text-align: left;
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -176,8 +331,8 @@ li {
   margin: 5px;
 } 
 
-/* Numbered Circle */
-li:before {
+/* Individual AI Task's Numbered Circle */
+li.ai-task:before {
   content: counter(my-counter); /* Increment the counter */
   counter-increment: my-counter; 
   display: inline-block;
@@ -186,10 +341,30 @@ li:before {
   line-height: 25px; 
   text-align: center; 
   border-radius: 50%; 
-  background-color: rgb(208, 208, 208); 
+  background-color: var(--imessage-gray-dark); 
   color: #fff; 
-  font-weight: bold; 
+  font-weight: 600; 
   margin-right: 10px; 
+}
+
+/* AI Pop-Up Buttons Container (Add, Refresh, Delete) */
+.ai-popup-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+/* AI Pop-Up Buttons (Add, Refresh, Delete)  */
+.ai-popup-button {
+  height: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 7px 10px;
+  background-color: white;
 }
 
 /* Login Page: Shown when user is not logged in Google yet. */
