@@ -19,6 +19,13 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Create .env file
+        run: |
+          cd frontend
+          touch .env
+          echo REACT_APP_DOMAIN=dev-igx0eff32n6l7436.us.auth0.com >> .env
+          echo REACT_APP_CLIENT_ID=l9uS8Pp86tE0Oy3G75wNgvfIOUXxhCyh >> .env
+
       - name: Install frontend dependencies
         run: |
           cd frontend

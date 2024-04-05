@@ -7,8 +7,8 @@ import AppLogo from '../images/app-logo.png';
 
 function App() {
   const [isAnimating] = useState(false);
-  const domain = process.env.REACT_APP_DOMAIN;
-  const clientId = process.env.REACT_APP_CLIENT_ID;
+  const domain = 'dev-igx0eff32n6l7436.us.auth0.com'; // Hardcoded for deployment. Will try to make it work from .env tho
+  const clientId = 'l9uS8Pp86tE0Oy3G75wNgvfIOUXxhCyh';
 
   return (
     <Auth0Provider domain={domain} clientId={clientId} redirectUri={window.location.origin}>
