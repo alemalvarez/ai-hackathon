@@ -14,6 +14,7 @@
   --imessage-blue: #278cff;
   --imessage-gray: rgb(239, 239, 239);
   --imessage-gray-dark: rgb(183, 183, 183);
+  --delete-red: rgb(252, 113, 113);
   font-family: "SF Pro";
   margin: 0;
   padding: 0;
@@ -131,6 +132,8 @@
   background-color: var(--imessage-gray);
 }
 
+/* Main Left Side: User Tasks & Input ------------------------------- */
+
 /* Form: Task & Details Input Field */
 .form {
   display: flex;
@@ -216,15 +219,39 @@ input {
   padding: 15px;
 }
 
+/* Wrapper for User Task List & Delete Button */
+.user-task-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
 /* User Task List */
 ol.user-task-list {
   counter-reset: my-counter; /* Reset the counter for the numbering */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 0;
+  margin: 20px 0;
   padding: 0;
   list-style-type: none;
+  font-size: 32px;
+}
+
+/* User Task Delete Button */
+.user-task-delete-button {
+  aspect-ratio: 1/1;
+  width: 38px;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: var(--delete-red);
+  font-family: "SF Pro";
+  font-weight: 900;
+  color:white;
 }
 
 /* Individual User Task's Numbered Circle */
@@ -247,13 +274,14 @@ li.user-task:before {
 
 
 
-/* Right Side: AI Suggestions ------------------------------- */
+/* Main Right Side: AI Suggestions ------------------------------- */
 
 /* Main Right Header: Chunkify AI Suggestions */
 .main-right h2 {
   display: flex;
   align-self: center;
   font-size: 28px;
+  margin-top: 5px;
 }
 
 /* AI Pop-Up Container, appears after user inputs task */ 
@@ -263,7 +291,6 @@ li.user-task:before {
   z-index: 1;
   width: auto;
   height: auto;
-  margin: 20px 0 0 0;
   padding: 15px 20px;
   border-radius: 10px;
   font-weight: 700;

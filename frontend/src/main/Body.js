@@ -3,6 +3,7 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
+
 import { firestore } from './FirebaseConfig.js';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 
@@ -112,15 +113,19 @@ function Body() {
         tasks.forEach((task) => {
             const taskElement = document.createElement('div');
             taskElement.innerHTML = `
-                <div>Project: ${task.project}</div>
-                <button class="delete-btn" data-task-id="${task.id}">Delete</button>
-                <hr>
+                <ol class="user-task-list">
+                    <div class="user-task-wrapper">
+                        <div class="user-task">${task.project}</div>
+                        <button class="user-task-delete-button" data-task-id="${task.id}">X</button>
+                    </div>
+                    <hr>
+                </ol>
             `;
             tasksListElement.appendChild(taskElement);
         });
         tasksListElement.addEventListener('click', async (event) => {
-            if (event.target.classList.contains('delete-btn')) {
-                event.preventDefault(); // P
+            if (event.target.classList.contains('user-task-delete-button')) {
+                event.preventDefault(); 
                 const taskId = event.target.dataset.taskId;
                 await deleteTask(taskId);
             }
@@ -129,7 +134,7 @@ function Body() {
     // Function: Fetch tasks for a user from Firestore
     const getTasksForUser = async (userId) => {
         try {
-            console.log('Fetching tasks for user:', userId); // Log user ID for debugging
+            console.log('getTasksForuser: Fetching tasks for user:', userId); // Log user ID for debugging
             const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
             const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             return tasks;
@@ -143,15 +148,16 @@ function Body() {
         e.preventDefault();
         console.log('Submitting form...');
         try {
-            console.log('Sending POST request to /response');
+            console.log('handleSubmit(): Sending POST request to /response');
             const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/response/' : '/response/', {
+            //const response = await fetch('/response/', { // todo TEMPORARY for cors. also remove "  "proxy": "http://localhost:5001",  " in package.json
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                
                 body: JSON.stringify({ project, details, numTasks }),
             });
-
             console.log('Response received:', response);
 
             if (!response.ok) {
@@ -234,14 +240,6 @@ function Body() {
                     <div id="tasksList"></div>
                     {/* <button type="submit">Submit</button> */}
                     </form>
-                    <div className="user-tasks">
-                        {/* <h2>Your Tasks</h2> */}
-                        <ol className="user-task-list"> 
-                            {/* <li> Task 1 Filler </li>
-                            <li> Task 2 Filler </li>
-                            <li> Task 3 Filler </li> */}
-                        </ol>
-                    </div>
                 </div>
                 
                 {/* Right side of the main app */}
