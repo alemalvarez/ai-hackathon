@@ -3,7 +3,7 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import './Animations.css';
 import Body from './Body';
-
+import AppLogo from '../images/app-logo.png';
 
 function App() {
   const [isAnimating] = useState(false);
@@ -14,13 +14,15 @@ function App() {
     <Auth0Provider domain={domain} clientId={clientId} redirectUri={window.location.origin}>
     <div className="app-background">
       <div className="app">
-        <h1 className="app-title">Chunkify.ai</h1>
-          <div className={`landing-page-wrapper ${isAnimating ? 'slide-out-right-fade-out' : ''}`}>
-            <h2 className="app-slogan">Where tasks meet their match. One chunk at a time.</h2>
-            <Body />
+          <div className="app-header">
+            <h1 className="app-title">Chunkify.ai</h1>
+            <img src={AppLogo} alt="Chunkify.ai Logo" className="app-logo" />
           </div>
+          
+          <div className={`landing-page-wrapper ${isAnimating ? 'slide-out-right-fade-out' : ''}`}>
+          </div>
+          <Body />
       </div>
-
     </div>
     </Auth0Provider>
   );

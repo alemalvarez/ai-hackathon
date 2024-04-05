@@ -4,16 +4,21 @@ import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
 
+
 // Component: AI Task Suggestions Popup
 function AIPopup({ subtasks }) {
     return (
-        <div className="ai-popup-container">
-            <h2>Tasks</h2>
-            <ol>
+        <div className="ai-popup-container slide-in-right-fade-in">
+            <ol className="ai-task-list">
                 {subtasks.map((subtask, index) => (
-                    <li key={index}>{subtask}</li>
+                    <li className="ai-task" key={index}>{subtask}</li>
                 ))}
             </ol>
+            <div className = "ai-popup-button-container">
+                <button className="ai-popup-button add">Add</button>
+                <button className="ai-popup-button refresh">Refresh</button>
+                <button className="ai-popup-button close">Close</button>
+            </div>
         </div>
     );
 }
@@ -30,7 +35,7 @@ function Body() {
     const [showMainPage] = useState(false);
     const [showDetails, setShowDetails] = useState(false); // State to show/hide the details input field
     const [hidingDetails, setHidingDetails] = useState(false); // New state to manage hiding animation
-
+    const numTasks = 3; // Number of tasks to request from the AI model
     // Function: Toggle details visibility
     const toggleDetails = () => {
         if (showDetails) {
@@ -55,7 +60,7 @@ function Body() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ project, details }),
+                body: JSON.stringify({ project, details, numTasks }),
             });
 
             console.log('Response received:', response);
@@ -77,14 +82,14 @@ function Body() {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter key pressed');
-
+            handleSubmit(e);
         }
     };
 
     // Body if user is logged in - Display the app normally.
     if (isAuthenticated) {
         return (
-            <div className={`main-page-wrapper animated ${showMainPage && !isAnimating ? 'slide-in-right-fade-in' : ''}`}>
+            <main className={`main-page animated ${showMainPage && !isAnimating ? 'slide-in-right-fade-in' : ''}`}>
                 <img 
                 className="google-profile-picture"
                 src={user.picture} 
@@ -92,48 +97,69 @@ function Body() {
                 onClick={() => logout({ returnTo: window.location.origin })}
                 style={{cursor: 'pointer'}} 
                 />
-                <form onSubmit={handleSubmit}>
-                    <div class="task-wrapper">
-                        {/*<!-- Task --> */}
-                        <input
-                            type="text"
-                            id="project"
-                            value={project}
-                            onChange={(e) => setProject(e.target.value)}
-                            placeholder="What you want to do?"
-                            onKeyPress={handleKeyPress}
-                        />
-                        {/* Triangle toggle button for showing/hiding details */}
-                        <div
-                            className={`triangle ${showDetails ? 'open' : ''}`} // This class changes based on the state
-                            onClick={toggleDetails}
-                        ></div>
-                    </div>
 
-                    {/* Conditional rendering for Details input with animation */}
-                    {(showDetails || hidingDetails) && (
+                {/* Left side of the main app */}
+                <div className="main-left">
+                    <form onSubmit={handleSubmit}>
+                        <div class="user-task-input-wrapper">
+                            {/* Task Input Field */}
+                            <input
+                                type="text"
+                                id="project"
+                                value={project}
+                                onChange={(e) => setProject(e.target.value)}
+                                placeholder="Enter task name..."
+                                onKeyPress={handleKeyPress}
+                                className="input-field"
+                            />
+                            <button className="submit-button" type="submit"></button>
+                        </div>
+                        {/* Triangle toggle button for showing/hiding details */}
+                        <div class="toggle-container" onClick={toggleDetails}>
+                            <p>Optional: Add Details</p>
+                            <div
+                                className={`triangle ${showDetails ? 'open' : ''}`} // This class changes based on the state
+                            ></div>
+                        </div>
+                        {/* Details Input Field; with animation */}
+                        {(showDetails || hidingDetails) && (
                         <input
                             type="text"
                             id="details"
                             value={details}
                             placeholder="Optional: Any additional details?"
                             onChange={(e) => setDetails(e.target.value)}
+                            onKeyPress={handleKeyPress}
                             className={`details-input ${hidingDetails ? 'hiding' : ''}`}
                         />
+                        )}
+                    </form>
+                    <div className="user-tasks">
+                        {/* <h2>Your Tasks</h2> */}
+                        <ol className="user-task-list"> 
+                            <li> Task 1 Filler </li>
+                            <li> Task 2 Filler </li>
+                            <li> Task 3 Filler </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                {/* Right side of the main app */}
+                <div class="main-right">
+                    <h2>Chunkify Suggestions</h2>
+                    {subtasks.length > 0 && (
+                        <AIPopup subtasks={subtasks} />
                     )}
-                    {/* <button type="submit">Submit</button> */}
-                </form>
-                {subtasks.length > 0 && (
-                    <AIPopup subtasks={subtasks} />
-                )}
+                </div>
                 {error && <p>{error}</p>}
-            </div>
+            </main>
         );
     } 
     // Body if user is not logged in - Display the login button.
     else {
         return (
             <div className="login-page">
+                    <h2 className="app-slogan">Where tasks meet their match. One chunk at a time.</h2>
                     <button className="google-sign-in-button" onClick={() => loginWithRedirect({ connection: 'google-oauth2' })}>
                     <img src={GoogleLogo} className="google-logo" alt="Google Logo" />
                     Sign In with Google
