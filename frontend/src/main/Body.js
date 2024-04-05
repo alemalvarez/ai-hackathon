@@ -3,6 +3,8 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
+import { firestore } from './FirebaseConfig.js';
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 
 
 // Component: AI Task Suggestions Popup
@@ -23,7 +25,6 @@ function AIPopup({ subtasks }) {
     );
 }
 
-
 // Component: Main Body of the App
 function Body() {
     const [project, setProject] = useState('');
@@ -35,7 +36,10 @@ function Body() {
     const [showMainPage] = useState(false);
     const [showDetails, setShowDetails] = useState(false); // State to show/hide the details input field
     const [hidingDetails, setHidingDetails] = useState(false); // New state to manage hiding animation
-    const numTasks = 3; // Number of tasks to request from the AI model
+    const numTasks = 5; // Number of tasks to request from the AI model
+    const [apiResponse, setApiResponse] = useState(null); // State to store API response temporarily
+    const [isSaving, setIsSaving] = useState(false); // State to track if saving to Firestore is in progress
+
     // Function: Toggle details visibility
     const toggleDetails = () => {
         if (showDetails) {
@@ -48,7 +52,92 @@ function Body() {
             setShowDetails(true);
         }
     };
-
+    // Function: Handle saving to Firestore
+    const handleSaveToFirestore = async () => {
+        setIsSaving(true); // Set saving state to true
+        try {
+            console.log('Storing data in Firestore');
+            const docRef = await addDoc(collection(firestore, 'responses'), {
+                ...apiResponse, // Save the API response data
+                timestamp: new Date().toISOString(),
+                userId: user?.sub, // Assuming user.sub contains the unique user identifier (UID)
+            });
+            console.log('Document written with ID: ', docRef.id);
+            setApiResponse(null); // Clear the temporary API response data
+        } catch (error) {
+            console.error('Error storing data in Firestore:', error);
+            setError('An error occurred while storing data.');
+        } finally {
+            setIsSaving(false); // Set saving state back to false after Firestore operation
+        }
+    };
+    // Function: Save task to Firestore
+    const saveTaskToFirestore = async () => {
+        try {
+            console.log('Storing Task in Firestore');
+            const docRef = await addDoc(collection(firestore, 'queries'), {
+                project,
+                timestamp: new Date().toISOString(),
+                userId: user?.sub, // Assuming user.sub contains the unique user identifier (UID)
+            });
+            console.log('Document written with ID: ', docRef.id);
+        }
+        catch (error) {
+            console.error('Error storing data in Firestore:', error);
+            setError('An error occurred while storing data.');
+        }
+    
+    };
+    // Function: Delete task from Firestore
+    const deleteTask = async (taskId) => {
+        try {
+            await deleteDoc(doc(collection(firestore, 'queries'), taskId));
+            console.log('Task deleted successfully');
+            // Refresh the tasks list after deletion
+            const tasks = await getTasksForUser(user?.sub);
+            renderTasks(tasks);
+        } catch (error) {
+            console.error('Error deleting task from Firestore:', error);
+            setError('An error occurred while deleting task.');
+        }
+    };
+    // Function: Render tasks in the HTML
+    const renderTasks = (tasks) => {
+        const tasksListElement = document.getElementById('tasksList');
+    
+        // Clear previous content
+        tasksListElement.innerHTML = '';
+        tasks.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        // Create HTML elements for each task and append to the tasksListElement
+        tasks.forEach((task) => {
+            const taskElement = document.createElement('div');
+            taskElement.innerHTML = `
+                <div>Project: ${task.project}</div>
+                <button class="delete-btn" data-task-id="${task.id}">Delete</button>
+                <hr>
+            `;
+            tasksListElement.appendChild(taskElement);
+        });
+        tasksListElement.addEventListener('click', async (event) => {
+            if (event.target.classList.contains('delete-btn')) {
+                event.preventDefault(); // P
+                const taskId = event.target.dataset.taskId;
+                await deleteTask(taskId);
+            }
+        });
+    };
+    // Function: Fetch tasks for a user from Firestore
+    const getTasksForUser = async (userId) => {
+        try {
+            console.log('Fetching tasks for user:', userId); // Log user ID for debugging
+            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
+            const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            return tasks;
+        } catch (error) {
+            console.error('Error fetching tasks from Firestore:', error);
+            throw new Error('An error occurred while fetching tasks. Please try again later.'); // Update error message if needed
+        }
+    };
     // Function: Handle what happens when a user submits their input.
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -72,6 +161,8 @@ function Body() {
             const data = await response.json();
             console.log('Data received:', data);
             setSubtasks(data.subtasks);
+            setApiResponse(data);
+            await saveTaskToFirestore();
         } catch (error) {
             console.error('Error:', error);
             setError('An error occurred while fetching data.');
@@ -85,6 +176,12 @@ function Body() {
             handleSubmit(e);
         }
     };
+    const userId = user?.sub; // Assuming user.sub contains the unique user identifier (UID)
+    const fetchDataAndRenderTasks = async () => {
+        const userTasks = await getTasksForUser(userId);
+        renderTasks(userTasks); // Render tasks in HTML
+    };
+    fetchDataAndRenderTasks();
 
     // Body if user is logged in - Display the app normally.
     if (isAuthenticated) {
@@ -133,13 +230,16 @@ function Body() {
                             className={`details-input ${hidingDetails ? 'hiding' : ''}`}
                         />
                         )}
+
+                    <div id="tasksList"></div>
+                    {/* <button type="submit">Submit</button> */}
                     </form>
                     <div className="user-tasks">
                         {/* <h2>Your Tasks</h2> */}
                         <ol className="user-task-list"> 
-                            <li> Task 1 Filler </li>
+                            {/* <li> Task 1 Filler </li>
                             <li> Task 2 Filler </li>
-                            <li> Task 3 Filler </li>
+                            <li> Task 3 Filler </li> */}
                         </ol>
                     </div>
                 </div>

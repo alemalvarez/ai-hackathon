@@ -90,10 +90,11 @@ def action():
 
     project = data['project']
     details = data['details']
+    numTasks = data['numTasks']
 
     # Prepare prompt for OpenAI completion
     instructions = """You are a scheduler assistant for breaking complex tasks into actionable chunks. Your goal is to provide a list of small actions that build up to the project chosen by the user."""
-    prompt = f"You will break down this task: {project} into 10 small subtasks, with the following considerations: {details}"
+    prompt = f"You will break down this task: {project} into {numTasks} small subtasks, with the following considerations: {details}"
 
     # Request completion from OpenAI API
     logging.info('Sending completion request to OpenAI API')
