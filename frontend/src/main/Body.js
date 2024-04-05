@@ -105,7 +105,7 @@ function Body() {
     // Function: Render tasks in the HTML
     const renderTasks = (tasks) => {
         const tasksListElement = document.getElementById('tasksList');
-    
+        if (tasksListElement) {
         // Clear previous content
         tasksListElement.innerHTML = '';
         tasks.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -130,12 +130,18 @@ function Body() {
                 await deleteTask(taskId);
             }
         });
+    } else
+        console.error('tasksList element not found');
     };
     // Function: Fetch tasks for a user from Firestore
     const getTasksForUser = async (userId) => {
+        if (!isAuthenticated || !user?.sub) {
+            console.warn('User is not authenticated or user.sub is undefined');
+            return []; // Return an empty array or handle as needed
+        }
         try {
             console.log('getTasksForuser: Fetching tasks for user:', userId); // Log user ID for debugging
-            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
+            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', userId)));
             const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             return tasks;
         } catch (error) {
