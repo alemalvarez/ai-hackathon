@@ -174,6 +174,7 @@ function Body() {
             console.log('Data received:', data);
             setSubtasks(data.subtasks);
             setApiResponse(data);
+            await handleSaveToFirestore();
             await saveTaskToFirestore();
         } catch (error) {
             console.error('Error:', error);
