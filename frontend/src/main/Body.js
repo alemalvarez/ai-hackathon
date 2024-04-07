@@ -9,7 +9,8 @@ import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'fireb
 
 
 // Component: AI Task Suggestions Popup
-function AIPopup({ subtasks }) {
+function AIPopup({ subtasks, handleDownloadICS }) {
+    console.log('AIPopup props:', { subtasks, handleDownloadICS });
     return (
         <div className="ai-popup-container slide-in-right-fade-in">
             <ol className="ai-task-list">
@@ -21,6 +22,7 @@ function AIPopup({ subtasks }) {
                 <button className="ai-popup-button add">Add</button>
                 <button className="ai-popup-button refresh">Refresh</button>
                 <button className="ai-popup-button close">Close</button>
+                <button className="ai-popup-button download"onClick={handleDownloadICS}>Download ICS</button>
             </div>
         </div>
     );
@@ -53,6 +55,34 @@ function Body() {
             setShowDetails(true);
         }
     };
+    const handleDownloadICS = async () => {
+        try {
+          const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/save_to_ical/' : '/save_to_ical/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ project, details, subtasks }),
+          });
+      
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+      
+          const icsContent = await response.text();
+          const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'tasks.ics');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error('Error downloading ICS file:', error);
+          setError('An error occurred while downloading the ICS file.');
+        }
+      };
     // Function: Handle saving to Firestore
     const handleSaveToFirestore = async () => {
         setIsSaving(true); // Set saving state to true
@@ -105,7 +135,7 @@ function Body() {
     // Function: Render tasks in the HTML
     const renderTasks = (tasks) => {
         const tasksListElement = document.getElementById('tasksList');
-    
+        if (tasksListElement) {
         // Clear previous content
         tasksListElement.innerHTML = '';
         tasks.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -130,12 +160,18 @@ function Body() {
                 await deleteTask(taskId);
             }
         });
+    } else
+        console.error('tasksList element not found');
     };
     // Function: Fetch tasks for a user from Firestore
     const getTasksForUser = async (userId) => {
+        if (!isAuthenticated || !user?.sub) {
+            console.warn('User is not authenticated or user.sub is undefined');
+            return []; // Return an empty array or handle as needed
+        }
         try {
             console.log('getTasksForuser: Fetching tasks for user:', userId); // Log user ID for debugging
-            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
+            const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', userId)));
             const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             return tasks;
         } catch (error) {
@@ -168,12 +204,14 @@ function Body() {
             console.log('Data received:', data);
             setSubtasks(data.subtasks);
             setApiResponse(data);
+            await handleSaveToFirestore();
             await saveTaskToFirestore();
         } catch (error) {
             console.error('Error:', error);
             setError('An error occurred while fetching data.');
         }
     };
+   
 
     // Function: Listen for the Enter key press to submit the input.
     const handleKeyPress = (e) => {
@@ -246,7 +284,7 @@ function Body() {
                 <div class="main-right">
                     <h2>Chunkify Suggestions</h2>
                     {subtasks.length > 0 && (
-                        <AIPopup subtasks={subtasks} />
+                        <AIPopup subtasks={subtasks} handleDownloadICS={handleDownloadICS}/>
                     )}
                 </div>
                 {error && <p>{error}</p>}
