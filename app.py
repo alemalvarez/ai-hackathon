@@ -26,12 +26,15 @@ openai_client = OpenAI(organization="org-R588VtVPiLayZlPfc2F0DyAI")
 # Check if running in development environment
 is_dev = os.getenv('FLASK_ENV') == 'development'
 
-# CORS configuration ONLY running on dev. This won't run on prod.
+# CORS configuration for development: Allow all origins
 if is_dev:
     logging.info("WARNING: CORS enabled. Hope you're not in production ;)")
+    print("WARNING: CORS enabled. Hope you're not in production ;)")
     from flask_cors import CORS
+    CORS(app, origins="*")
+# CORS configuration for production: Allow only the origin specified in the environment variable
+else:
     CORS(app, origins=os.getenv('CORS_ORIGIN'))
-
 
 @app.route('/')
 def index():

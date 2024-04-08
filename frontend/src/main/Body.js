@@ -3,10 +3,8 @@ import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import './Animations.css';
 import GoogleLogo from '../images/google-logo.png';
-
 import { firestore } from './FirebaseConfig.js';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
-
 
 // Component: AI Task Suggestions Popup
 function AIPopup({ subtasks, handleDownloadICS }) {
@@ -18,12 +16,50 @@ function AIPopup({ subtasks, handleDownloadICS }) {
                     <li className="ai-task" key={index}>{subtask}</li>
                 ))}
             </ol>
-            <div className = "ai-popup-button-container">
+            <div className="ai-popup-button-container">
                 <button className="ai-popup-button add">Add</button>
                 <button className="ai-popup-button refresh">Refresh</button>
                 <button className="ai-popup-button close">Close</button>
-                <button className="ai-popup-button download"onClick={handleDownloadICS}>Download ICS</button>
+                <button className="ai-popup-button download" onClick={handleDownloadICS}>Download ICS</button>
             </div>
+        </div>
+    );
+}
+
+// Component: Task Input Form
+function TaskInputForm({ project, setProject, handleSubmit, handleKeyPress }) {
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="user-task-input-wrapper">
+                {/* Task Input Field */}
+                <input
+                    type="text"
+                    id="project"
+                    value={project}
+                    onChange={(e) => setProject(e.target.value)}
+                    placeholder="Enter task name..."
+                    onKeyPress={handleKeyPress}
+                    className="input-field"
+                />
+                <button className="submit-button" type="submit"></button>
+            </div>
+        </form>
+    );
+}
+
+// Component: Task List
+function TaskList({ tasks, deleteTask }) {
+    return (
+        <div id="tasksList">
+            {tasks.map((task) => (
+                <ol className="user-task-list" key={task.id}>
+                    <div className="user-task-wrapper">
+                        <div className="user-task">{task.project}</div>
+                        <button className="user-task-delete-button" data-task-id={task.id}>X</button>
+                    </div>
+                    <hr />
+                </ol>
+            ))}
         </div>
     );
 }
@@ -55,34 +91,36 @@ function Body() {
             setShowDetails(true);
         }
     };
+
+    // Function: Handle downloading ICS file
     const handleDownloadICS = async () => {
         try {
-          const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/save_to_ical/' : '/save_to_ical/', {
+        const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/save_to_ical/' : '/save_to_ical/', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
             },
             body: JSON.stringify({ project, details, subtasks }),
-          });
-      
-          if (!response.ok) {
+        });
+
+        if (!response.ok) {
             throw new Error('Network response was not ok');
-          }
-      
-          const icsContent = await response.text();
-          const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', 'tasks.ics');
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } catch (error) {
-          console.error('Error downloading ICS file:', error);
-          setError('An error occurred while downloading the ICS file.');
         }
-      };
+
+        const icsContent = await response.text();
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'tasks.ics');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        } catch (error) {
+        console.error('Error downloading ICS file:', error);
+        setError('An error occurred while downloading the ICS file.');
+        }
+    };
     // Function: Handle saving to Firestore
     const handleSaveToFirestore = async () => {
         setIsSaving(true); // Set saving state to true
@@ -102,6 +140,7 @@ function Body() {
             setIsSaving(false); // Set saving state back to false after Firestore operation
         }
     };
+
     // Function: Save task to Firestore
     const saveTaskToFirestore = async () => {
         try {
@@ -132,9 +171,11 @@ function Body() {
             setError('An error occurred while deleting task.');
         }
     };
+
     // Function: Render tasks in the HTML
     const renderTasks = (tasks) => {
         const tasksListElement = document.getElementById('tasksList');
+
         if (tasksListElement) {
         // Clear previous content
         tasksListElement.innerHTML = '';
@@ -171,6 +212,7 @@ function Body() {
         }
         try {
             console.log('getTasksForuser: Fetching tasks for user:', userId); // Log user ID for debugging
+            //const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', user?.sub)));
             const querySnapshot = await getDocs(query(collection(firestore, 'queries'), where('userId', '==', userId)));
             const tasks = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             return tasks;
@@ -179,6 +221,7 @@ function Body() {
             throw new Error('An error occurred while fetching tasks. Please try again later.'); // Update error message if needed
         }
     };
+
     // Function: Handle what happens when a user submits their input.
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -186,7 +229,6 @@ function Body() {
         try {
             console.log('handleSubmit(): Sending POST request to /response');
             const response = await fetch(process.env.NODE_ENV === 'development' ? 'http://localhost:5001/response/' : '/response/', {
-            //const response = await fetch('/response/', { // todo TEMPORARY for cors. also remove "  "proxy": "http://localhost:5001",  " in package.json
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -195,7 +237,6 @@ function Body() {
                 body: JSON.stringify({ project, details, numTasks }),
             });
             console.log('Response received:', response);
-
             if (!response.ok) {
                 console.error('Network response was not ok');
                 throw new Error('Network response was not ok');
@@ -211,7 +252,6 @@ function Body() {
             setError('An error occurred while fetching data.');
         }
     };
-   
 
     // Function: Listen for the Enter key press to submit the input.
     const handleKeyPress = (e) => {
@@ -220,11 +260,15 @@ function Body() {
             handleSubmit(e);
         }
     };
+
     const userId = user?.sub; // Assuming user.sub contains the unique user identifier (UID)
+
+    // Function: Fetch tasks for the user and render them in the HTML
     const fetchDataAndRenderTasks = async () => {
         const userTasks = await getTasksForUser(userId);
         renderTasks(userTasks); // Render tasks in HTML
     };
+
     fetchDataAndRenderTasks();
 
     // Body if user is logged in - Display the app normally.
@@ -241,43 +285,13 @@ function Body() {
 
                 {/* Left side of the main app */}
                 <div className="main-left">
-                    <form onSubmit={handleSubmit}>
-                        <div class="user-task-input-wrapper">
-                            {/* Task Input Field */}
-                            <input
-                                type="text"
-                                id="project"
-                                value={project}
-                                onChange={(e) => setProject(e.target.value)}
-                                placeholder="Enter task name..."
-                                onKeyPress={handleKeyPress}
-                                className="input-field"
-                            />
-                            <button className="submit-button" type="submit"></button>
-                        </div>
-                        {/* Triangle toggle button for showing/hiding details */}
-                        <div class="toggle-container" onClick={toggleDetails}>
-                            <p>Optional: Add Details</p>
-                            <div
-                                className={`triangle ${showDetails ? 'open' : ''}`} // This class changes based on the state
-                            ></div>
-                        </div>
-                        {/* Details Input Field; with animation */}
-                        {(showDetails || hidingDetails) && (
-                        <input
-                            type="text"
-                            id="details"
-                            value={details}
-                            placeholder="Optional: Any additional details?"
-                            onChange={(e) => setDetails(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className={`details-input ${hidingDetails ? 'hiding' : ''}`}
-                        />
-                        )}
-
+                    <TaskInputForm
+                        project={project}
+                        setProject={setProject}
+                        handleSubmit={handleSubmit}
+                        handleKeyPress={handleKeyPress}
+                    />
                     <div id="tasksList"></div>
-                    {/* <button type="submit">Submit</button> */}
-                    </form>
                 </div>
                 
                 {/* Right side of the main app */}
