@@ -33,8 +33,6 @@ if is_dev:
     from flask_cors import CORS
     CORS(app, origins="*")
 # CORS configuration for production: Allow only the origin specified in the environment variable
-else:
-    CORS(app, origins=os.getenv('CORS_ORIGIN'))
 
 @app.route('/')
 def index():
